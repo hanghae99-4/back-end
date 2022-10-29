@@ -1,8 +1,9 @@
-package com.hanghae.instakilogram.security;
+package com.hanghae.instakilogram.security.jwt;
 
 import com.hanghae.instakilogram.dto.TokenDto;
 import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.repository.MemberRepository;
+import com.hanghae.instakilogram.security.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

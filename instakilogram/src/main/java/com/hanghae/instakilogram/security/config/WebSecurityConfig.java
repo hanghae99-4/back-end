@@ -1,9 +1,10 @@
-package com.hanghae.instakilogram.security;
+package com.hanghae.instakilogram.security.config;
 
 
 import com.hanghae.instakilogram.security.exception.JwtAccessDeniedHandler;
 import com.hanghae.instakilogram.security.jwt.JwtAuthenticationEntryPoint;
-import com.hanghae.instakilogram.security.jwt.JwtSecurityConfig;
+import com.hanghae.instakilogram.security.config.JwtSecurityConfig;
+import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;

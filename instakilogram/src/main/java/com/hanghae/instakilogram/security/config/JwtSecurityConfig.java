@@ -1,6 +1,7 @@
-package com.hanghae.instakilogram.security.jwt;
+package com.hanghae.instakilogram.security.config;
 
-import com.hanghae.instakilogram.security.TokenProvider;
+import com.hanghae.instakilogram.security.jwt.JwtFilter;
+import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

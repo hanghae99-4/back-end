@@ -1,6 +1,5 @@
 package com.hanghae.instakilogram.security.jwt;
 
-import com.hanghae.instakilogram.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

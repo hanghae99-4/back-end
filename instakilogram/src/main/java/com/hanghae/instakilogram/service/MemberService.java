@@ -8,7 +8,7 @@ import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.entity.RefreshToken;
 import com.hanghae.instakilogram.repository.MemberRepository;
 import com.hanghae.instakilogram.repository.RefreshTokenRepository;
-import com.hanghae.instakilogram.security.TokenProvider;
+import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import com.hanghae.instakilogram.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
