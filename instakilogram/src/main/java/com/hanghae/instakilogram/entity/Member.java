@@ -6,10 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Primary;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -19,7 +18,7 @@ import javax.persistence.Id;
 public class Member extends TimeStamped {
 
     @Id
-    private String userId;
+    private String memberId;
 
     @Column(nullable = false)
     private String username;
@@ -30,4 +29,11 @@ public class Member extends TimeStamped {
     @JsonIgnore
     @Column(nullable = false)
     private String password;
+
+    @Column()
+    private String memberImage;
+
+    @JsonIgnore
+    @Enumerated(EnumType.STRING)
+    private Authority authority;
 }
