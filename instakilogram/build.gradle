@@ -37,6 +37,8 @@ dependencies {
 
     // AWS RDS
     runtimeOnly 'mysql:mysql-connector-java'
+
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
 }
 
 tasks.named('test') {
