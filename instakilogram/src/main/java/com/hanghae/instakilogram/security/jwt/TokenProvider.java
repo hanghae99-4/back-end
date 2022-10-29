@@ -74,7 +74,6 @@ public class TokenProvider {
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new IllegalStateException("권한 정보가 없는 토큰입니다.");
         }
-
         String memberId = claims.getSubject();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find " + memberId));

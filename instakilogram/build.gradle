@@ -38,7 +38,11 @@ dependencies {
     // AWS RDS
     runtimeOnly 'mysql:mysql-connector-java'
 
+    // Swagger
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
+
+    // AWS S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {

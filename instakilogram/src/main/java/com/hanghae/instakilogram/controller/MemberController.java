@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Tag(name = "Member", description = "회원관리 API")
 @RestController
@@ -26,15 +27,11 @@ public class MemberController {
         return memberService.signUp(signupRequestDto);
     }
 
-    @PostMapping("/login")
-    @Operation(summary = "Log In", description = "로그인")
-    public ResponseDto<?> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
-        return memberService.login(loginRequestDto, httpServletResponse);
-    }
 
     @GetMapping("/signup/checkid")
     @Operation(summary = "ID Check", description = "멤버 ID 확인")
-    public ResponseDto<?> checkId(@RequestBody CheckIdRequestDto checkIdRequestDto) {
+    public ResponseDto<?> checkId(@RequestBody CheckIdRequestDto checkIdRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails ) {
+        System.out.println(userDetails);
         return memberService.checkId(checkIdRequestDto);
     }
 
@@ -42,5 +39,17 @@ public class MemberController {
     @Operation(summary = "Nickname Check", description = "멤버 Nickname 확인")
     public ResponseDto<?> checkNickname(@RequestBody CheckNicknameRequestDto checkNicknameRequestDto) {
         return memberService.checkNickname(checkNicknameRequestDto);
+    }
+
+    @PutMapping("/{memberId}")
+    @Operation(summary = "Member Info Update", description = "멤버 정보 업데이트")
+    public ResponseDto<?> memberUpdate(@ModelAttribute MemberUpdateRequestDto memberUpdateRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        return memberService.memberUpdate(memberUpdateRequestDto, userDetails);
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Log In", description = "로그인")
+    public ResponseDto<?> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
+        return memberService.login(loginRequestDto, httpServletResponse);
     }
 }

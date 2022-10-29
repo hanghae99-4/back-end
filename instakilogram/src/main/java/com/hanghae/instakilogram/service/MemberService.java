@@ -8,8 +8,10 @@ import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.entity.RefreshToken;
 import com.hanghae.instakilogram.repository.MemberRepository;
 import com.hanghae.instakilogram.repository.RefreshTokenRepository;
+import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import com.hanghae.instakilogram.security.jwt.JwtFilter;
+import com.hanghae.instakilogram.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,8 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public ResponseDto<?> signUp(SignupRequestDto signupRequestDto) {
@@ -68,14 +73,10 @@ public class MemberService {
     public ResponseDto<?> login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
-        System.out.println(11111111);
-        System.out.println(authenticationToken);
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        System.out.println(22222222);
         Member member = memberRepository.findById(loginRequestDto.getMemberId())
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저입니다."));
 
-        System.out.println(33333333);
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword()))
             throw new RuntimeException("패스워드가 일치하지 않습니다.");
 
@@ -95,4 +96,24 @@ public class MemberService {
     }
 
 
+    public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, UserDetailsImpl userDetails) throws IOException {
+        Member preMember = memberRepository.findById(userDetails.getMember().getMemberId())
+                .orElseThrow(() -> new IllegalStateException(" 회원 정보가 존재하지 않습니다."));
+
+
+        Member member = Member.builder()
+                .memberId(preMember.getMemberId())
+                .username(preMember.getUsername())
+                .nickname(memberUpdateRequestDto.getNickname())
+                .password(preMember.getPassword())
+                .introduce(memberUpdateRequestDto.getIntroduce())
+                .authority(preMember.getAuthority())
+                .memberImage(
+                        (memberUpdateRequestDto.getMemberImage().getOriginalFilename().equals(""))?
+                                null:s3Uploader.uploadFiles(memberUpdateRequestDto.getMemberImage(), "member", userDetails))
+                .build();
+
+        memberRepository.save(member);
+        return ResponseDto.success("회원정보를 업데이트 하셨습니다.");
+    }
 }

@@ -33,6 +33,9 @@ public class Member extends TimeStamped {
     @Column()
     private String memberImage;
 
+    @Column()
+    private String introduce;
+
     @JsonIgnore
     @Enumerated(EnumType.STRING)
     private Authority authority;
