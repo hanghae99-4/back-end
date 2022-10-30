@@ -1,6 +1,5 @@
 package com.hanghae.instakilogram.controller;
 
-import com.hanghae.instakilogram.dto.TokenDto;
 import com.hanghae.instakilogram.dto.request.*;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.security.UserDetailsImpl;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Tag(name = "Member", description = "회원관리 API")
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
@@ -28,23 +26,22 @@ public class MemberController {
     }
 
 
-    @GetMapping("/signup/checkid")
+    @GetMapping("/signup/checkid/{id}")
     @Operation(summary = "ID Check", description = "멤버 ID 확인")
-    public ResponseDto<?> checkId(@RequestBody CheckIdRequestDto checkIdRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails ) {
-        System.out.println(userDetails);
-        return memberService.checkId(checkIdRequestDto);
+    public ResponseDto<?> checkId(@PathVariable String id) {
+        return memberService.checkId(id);
     }
 
-    @GetMapping("/signup/checknickname")
+    @GetMapping("/signup/checknickname/{id}")
     @Operation(summary = "Nickname Check", description = "멤버 Nickname 확인")
-    public ResponseDto<?> checkNickname(@RequestBody CheckNicknameRequestDto checkNicknameRequestDto) {
-        return memberService.checkNickname(checkNicknameRequestDto);
+    public ResponseDto<?> checkNickname(@PathVariable String id) {
+        return memberService.checkNickname(id);
     }
 
     @PutMapping("/{memberId}")
     @Operation(summary = "Member Info Update", description = "멤버 정보 업데이트")
-    public ResponseDto<?> memberUpdate(@ModelAttribute MemberUpdateRequestDto memberUpdateRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return memberService.memberUpdate(memberUpdateRequestDto, userDetails);
+    public ResponseDto<?> memberUpdate(@ModelAttribute MemberUpdateRequestDto memberUpdateRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable String memberId) throws IOException {
+        return memberService.memberUpdate(memberUpdateRequestDto, userDetails, memberId);
     }
 
     @PostMapping("/login")

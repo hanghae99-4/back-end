@@ -3,7 +3,6 @@ package com.hanghae.instakilogram.security.config;
 
 import com.hanghae.instakilogram.security.exception.JwtAccessDeniedHandler;
 import com.hanghae.instakilogram.security.jwt.JwtAuthenticationEntryPoint;
-import com.hanghae.instakilogram.security.config.JwtSecurityConfig;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +35,12 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return  (web) -> web.ignoring()
+                .antMatchers( "/favicon.ico");
+    }
+
+    @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -45,16 +51,24 @@ public class WebSecurityConfig {
                 .accessDeniedHandler(jwtAccessDeniedHandler)
 
                 .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
+
+                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
                 .authorizeRequests()
-                .antMatchers("/signup").permitAll()
+                .antMatchers("/signup/**").permitAll()
                 .antMatchers("/login").permitAll()
-                .antMatchers("/**").authenticated()
+                .antMatchers("/v2/api-docs/**").permitAll()   // OAS_30
+                .antMatchers("/swagger-resources/**").permitAll()
+                // .antMatchers("/v2/api-docs/**").permitAll()   // swagger 2
+                .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest()
-                .permitAll()
+                .authenticated()
 
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));

@@ -55,15 +55,15 @@ public class MemberService {
         memberRepository.save(member);
         return ResponseDto.success("회원가입 되었습니다.");
     }
-    public ResponseDto<?> checkId(CheckIdRequestDto checkIdRequestDto) {
+    public ResponseDto<?> checkId(String id) {
 
-        if (memberRepository.existsByMemberId(checkIdRequestDto.getMemberId()))
+        if (memberRepository.existsByMemberId(id))
             return ResponseDto.fail("사용 중인 ID입니다.");
 
         return ResponseDto.success("사용 가능한 ID 입니다.");
     }
-    public ResponseDto<?> checkNickname(CheckNicknameRequestDto checkNicknameRequestDto) {
-        if (memberRepository.existsByMemberId(checkNicknameRequestDto.getNickname()))
+    public ResponseDto<?> checkNickname(String id) {
+        if (memberRepository.existsByMemberId(id))
             return ResponseDto.fail("사용 중인 Nickname 입니다.");
 
         return ResponseDto.success("사용 가능한 Nickname 입니다.");
@@ -96,11 +96,14 @@ public class MemberService {
     }
 
 
-    public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, UserDetailsImpl userDetails) throws IOException {
+    public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, UserDetailsImpl userDetails, String memberId) throws IOException {
+
         Member preMember = memberRepository.findById(userDetails.getMember().getMemberId())
-                .orElseThrow(() -> new IllegalStateException(" 회원 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new UsernameNotFoundException(" 회원 정보가 존재하지 않습니다."));
 
-
+        if (!preMember.getMemberId().equals(memberId)) {
+            return ResponseDto.fail("본인만 수정할 수 있습니다.");
+        }
         Member member = Member.builder()
                 .memberId(preMember.getMemberId())
                 .username(preMember.getUsername())
@@ -116,4 +119,5 @@ public class MemberService {
         memberRepository.save(member);
         return ResponseDto.success("회원정보를 업데이트 하셨습니다.");
     }
+
 }
