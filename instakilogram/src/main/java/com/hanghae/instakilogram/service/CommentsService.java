@@ -10,6 +10,7 @@ import com.hanghae.instakilogram.repository.CommentsRepository;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class CommentsService {
     private final FeedsService feedsService;
     private final TokenProvider tokenProvider;
 
+    @Transactional
     public ResponseDto<?> createComment(CommentsRequestDto commentsRequestDto, Long feedId, HttpServletRequest request) {
 
 
@@ -50,7 +52,7 @@ public class CommentsService {
                             .nickname(member.getNickname())
                             .contents(comment.getContents())
                             .feedId(comment.getId())
-                            .memberId()                             //  String memberId
+                            .memberId(comment.getMember().getMemberId())                             //  String memberId
                             .createdAt(comment.getCreatedAt())
                             .modifiedAt(comment.getModifiedAt())
                             .build()
@@ -59,14 +61,14 @@ public class CommentsService {
 
 
 
-
+    @Transactional(readOnly = true)
     public ResponseDto<?> getComments(Long feedId) {
         Feeds feed = feedsService.isPresentFeed(feedId);
         if (null == feed) {
             return ResponseDto.fail("피드가 존재하지 않습니다.");
         }
 
-        List<Comments> commentList = commentsRepository.findAllByFeedId(feedId);
+        List<Comments> commentList = commentsRepository.findAllByFeeds(feed);
         List<CommentsResponseDto> commentResponseDtoList = new ArrayList<>();
 
         for (Comments comment : commentList) {
@@ -75,7 +77,7 @@ public class CommentsService {
                     .nickname(comment.getMember().getNickname())
                     .contents(comment.getContents())
                     .feedId(comment.getFeeds().getId())
-                    .memberId()                                 //  String memberId
+                    .memberId(comment.getMember().getMemberId())
                     .createdAt(comment.getCreatedAt())
                     .modifiedAt(comment.getModifiedAt())
                     .build());
@@ -83,6 +85,7 @@ public class CommentsService {
         return ResponseDto.success(commentResponseDtoList);
     }
 
+    @Transactional
     public ResponseDto<?> updateComment(CommentsRequestDto commentsRequestDto, Long feedId, Long commentId, HttpServletRequest request) {
         Member member = validateMember(request);
         if (null == member) {
@@ -108,7 +111,7 @@ public class CommentsService {
                 CommentsResponseDto.builder()
                         .id(comment.getId())
                         .nickname(member.getNickname())
-                        .memberId()                            // String memberId
+                        .memberId(comment.getMember().getMemberId())
                         .contents(comment.getContents())
                         .createdAt(comment.getCreatedAt())
                         .modifiedAt(comment.getModifiedAt())
@@ -119,6 +122,7 @@ public class CommentsService {
 
 
 
+    @Transactional
     public ResponseDto<?> deleteComment(Long feedId, Long commentId, HttpServletRequest request) {
 
         Member member = validateMember(request);
@@ -141,6 +145,7 @@ public class CommentsService {
     }
 
 
+    @Transactional
     public Member validateMember(HttpServletRequest request) {
         if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
             return null;
@@ -148,7 +153,8 @@ public class CommentsService {
         return tokenProvider.getMemberFromAuthentication();
     }
 
-    private Comments isPresentComment(Long id) {
+    @Transactional(readOnly = true)
+    public Comments isPresentComment(Long id) {
         Optional<Comments> optionalComment = commentsRepository.findById(id);
         return optionalComment.orElse(null);
     }
