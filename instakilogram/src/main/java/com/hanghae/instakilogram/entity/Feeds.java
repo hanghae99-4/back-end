@@ -1,5 +1,6 @@
 package com.hanghae.instakilogram.entity;
 
+import com.hanghae.instakilogram.dto.request.FeedsRequestDto;
 import com.hanghae.instakilogram.util.TimeStamped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -18,7 +20,7 @@ public class Feeds extends TimeStamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -30,4 +32,12 @@ public class Feeds extends TimeStamped {
 
     @Column
     private String contents;
+
+
+
+    public void update(FeedsRequestDto feedsRequestDto) {
+
+        this.contents = feedsRequestDto.getContent();
+
+    }
 }

@@ -1,5 +1,8 @@
 package com.hanghae.instakilogram.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hanghae.instakilogram.dto.request.HeartRequestDto;
+import com.hanghae.instakilogram.dto.response.HeartResponseDto;
 import com.hanghae.instakilogram.util.TimeStamped;
 import lombok.*;
 
@@ -16,11 +19,18 @@ public class Heart extends TimeStamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feeds_id")
-    private Feeds Feeds;
+    @JsonIgnore
+    private Feeds feeds;
+
+    @Builder
+    public Heart(HeartRequestDto requestDto) {
+        this.member = requestDto.getMember();
+        this.feeds = requestDto.getFeeds();
+    }
 }

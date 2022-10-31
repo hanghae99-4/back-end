@@ -49,4 +49,6 @@ public class MemberController {
     public ResponseDto<?> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
         return memberService.login(loginRequestDto, httpServletResponse);
     }
+
+
 }

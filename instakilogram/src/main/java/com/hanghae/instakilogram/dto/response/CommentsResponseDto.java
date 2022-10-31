@@ -15,6 +15,7 @@ public class CommentsResponseDto {
     private Long id;
     private String nickname;
     private String contents;
+    private String memeberImage;
     private Long feedId;
     private String memberId;
     private LocalDateTime createdAt;
