@@ -19,8 +19,8 @@ import java.util.Date;
 public class TimeStamped {
 
     @CreatedDate
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    private Date modifiedAt;
+    private LocalDateTime modifiedAt;
 }
