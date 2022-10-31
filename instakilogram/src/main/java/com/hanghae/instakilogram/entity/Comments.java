@@ -32,12 +32,4 @@ public class Comments extends TimeStamped {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public boolean validateMember(Member member) {
-        return !this.member.getMemberId().equals(member.getMemberId());
-    }
-
-
-    public void update(CommentsRequestDto commentsRequestDto) {
-        this.contents = commentsRequestDto.getContents();
-    }
 }

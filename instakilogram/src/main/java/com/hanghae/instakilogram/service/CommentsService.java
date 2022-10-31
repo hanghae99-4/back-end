@@ -7,8 +7,10 @@ import com.hanghae.instakilogram.entity.Comments;
 import com.hanghae.instakilogram.entity.Feeds;
 import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.repository.CommentsRepository;
+import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,51 +24,23 @@ import java.util.Optional;
 public class CommentsService {
     private final CommentsRepository commentsRepository;
     private final FeedsService feedsService;
-    private final TokenProvider tokenProvider;
 
     @Transactional
-    public ResponseDto<?> createComment(CommentsRequestDto commentsRequestDto, Long feedId, HttpServletRequest request) {
+    public ResponseDto<?> createComment(CommentsRequestDto commentsRequestDto, Long feedsId, UserDetailsImpl userDetails) {
 
-
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("로그인 후 사용가능합니다.");
-        }
-
-        Feeds feed = feedsService.isPresentFeed(commentsRequestDto.getFeedId());
-        if (null == feed) {
-            return ResponseDto.fail("피드가 존재하지 않습니다.");
-        }
-
-
+            Feeds feed = feedsService.getFeed(feedsId);
             Comments comment = Comments.builder()
-                    .member(member)
+                    .member(userDetails.getMember())
                     .feeds(feed)
                     .contents(commentsRequestDto.getContents())
                     .build();
             commentsRepository.save(comment);
-
-            return ResponseDto.success(
-                    CommentsResponseDto.builder()
-                            .id(comment.getId())
-                            .nickname(member.getNickname())
-                            .contents(comment.getContents())
-                            .feedId(comment.getId())
-                            .memberId(comment.getMember().getMemberId())                             //  String memberId
-                            .createdAt(comment.getCreatedAt())
-                            .modifiedAt(comment.getModifiedAt())
-                            .build()
-            );
+            return ResponseDto.success("댓글을 등록하셨습니다.");
     }
-
-
 
     @Transactional(readOnly = true)
     public ResponseDto<?> getComments(Long feedId) {
-        Feeds feed = feedsService.isPresentFeed(feedId);
-        if (null == feed) {
-            return ResponseDto.fail("피드가 존재하지 않습니다.");
-        }
+        Feeds feed = feedsService.getFeed(feedId);
 
         List<Comments> commentList = commentsRepository.findAllByFeeds(feed);
         List<CommentsResponseDto> commentResponseDtoList = new ArrayList<>();
@@ -74,88 +48,30 @@ public class CommentsService {
         for (Comments comment : commentList) {
             commentResponseDtoList.add(CommentsResponseDto.builder()
                     .id(comment.getId())
-                    .nickname(comment.getMember().getNickname())
                     .contents(comment.getContents())
                     .feedId(comment.getFeeds().getId())
                     .memberId(comment.getMember().getMemberId())
-                    .createdAt(comment.getCreatedAt())
-                    .modifiedAt(comment.getModifiedAt())
                     .build());
         }
         return ResponseDto.success(commentResponseDtoList);
     }
 
     @Transactional
-    public ResponseDto<?> updateComment(CommentsRequestDto commentsRequestDto, Long feedId, Long commentId, HttpServletRequest request) {
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("로그인 후 수정 가능합니다.");
-        }
+    public ResponseDto<?> deleteComment(Long commentId, UserDetailsImpl userDetails) {
 
-        Feeds feed = feedsService.isPresentFeed(commentsRequestDto.getFeedId());
-        if (null == feed) {
-            return ResponseDto.fail("피드가 존재하지 않습니다.");
-        }
+        Comments comment = getComment(commentId);
 
-        Comments comment = isPresentComment(commentId);
-        if (null == comment) {
-            return ResponseDto.fail("댓글을 찾을 수 없습니다.");
-        }
-
-        if (comment.validateMember(member)) {
-            return ResponseDto.fail("작성자만 수정 가능합니다.");
-        }
-
-        comment.update(commentsRequestDto);
-        return ResponseDto.success(
-                CommentsResponseDto.builder()
-                        .id(comment.getId())
-                        .nickname(member.getNickname())
-                        .memberId(comment.getMember().getMemberId())
-                        .contents(comment.getContents())
-                        .createdAt(comment.getCreatedAt())
-                        .modifiedAt(comment.getModifiedAt())
-                        .feedId(feed.getId())
-                        .build()
-        );
-    }
-
-
-
-    @Transactional
-    public ResponseDto<?> deleteComment(Long feedId, Long commentId, HttpServletRequest request) {
-
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("로그인 후 수정 가능합니다.");
-        }
-
-
-        Comments comment = isPresentComment(commentId);
-        if (null == comment) {
-            return ResponseDto.fail("댓글을 찾을 수 없습니다.");
-        }
-
-        if (comment.validateMember(member)) {
+        if (!comment.getMember().getMemberId().equals(userDetails.getMember().getMemberId())) {
             return ResponseDto.fail("댓글 작성자만 수정 가능합니다.");
         }
 
         commentsRepository.delete(comment);
-        return ResponseDto.success(true);
-    }
-
-
-    @Transactional
-    public Member validateMember(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("Refresh-Token"))) {
-            return null;
-        }
-        return tokenProvider.getMemberFromAuthentication();
+        return ResponseDto.success("댓글을 삭제하셨습니다.");
     }
 
     @Transactional(readOnly = true)
-    public Comments isPresentComment(Long id) {
-        Optional<Comments> optionalComment = commentsRepository.findById(id);
-        return optionalComment.orElse(null);
+    public Comments getComment(Long id) {
+        Comments comments = commentsRepository.findById(id).orElseThrow(() -> new IllegalStateException("댓글이 존재하지 않습니다."));
+        return comments;
     }
 }

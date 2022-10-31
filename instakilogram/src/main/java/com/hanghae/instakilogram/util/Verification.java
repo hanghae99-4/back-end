@@ -17,17 +17,6 @@ public class Verification {
 
     private final FeedsRepository feedsRepository;
 
-    private final TokenProvider tokenProvider;
-
-    public Member validateMember(HttpServletRequest httpServletRequest) {
-
-        if(!tokenProvider.validateToken(httpServletRequest.getHeader("Authorization").substring(7))){
-            return null;
-        }
-
-        return tokenProvider.getMemberFromAuthentication();
-    }
-
     public Feeds getCurrentFeeds(Long feedsId) {
 
         Optional<Feeds> feeds = feedsRepository.findById(feedsId);

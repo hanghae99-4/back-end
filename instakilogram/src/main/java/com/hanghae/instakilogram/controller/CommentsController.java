@@ -2,6 +2,7 @@ package com.hanghae.instakilogram.controller;
 
 import com.hanghae.instakilogram.dto.request.CommentsRequestDto;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
+import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.service.CommentsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,30 +13,23 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/feeds")
+@RequestMapping()
 public class CommentsController {
 
     private final CommentsService commentsService;
 
-    @PostMapping("/{feeds_id}/Comments")
-    public ResponseDto<?> createComment(@RequestBody CommentsRequestDto commentRequestDto, @PathVariable Long feedId, HttpServletRequest request) {
-        return commentsService.createComment(commentRequestDto, feedId, request);
+    @PostMapping("/{feedsId}/comments")
+    public ResponseDto<?> createComment(@RequestBody CommentsRequestDto commentRequestDto, @PathVariable("feedsId") Long feedsId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentsService.createComment(commentRequestDto, feedsId, userDetails);
     }
 
-    @GetMapping("/{feeds_id}/comments")
-    public ResponseDto<?> getComments(@PathVariable Long feedId) {
-        return commentsService.getComments(feedId);
+    @GetMapping("/{feedsId}/comments")
+    public ResponseDto<?> getComments(@PathVariable("feedsId") Long feedsId) {
+        return commentsService.getComments(feedsId);
     }
 
-    @PutMapping("/{feeds_id}/comments/{comments_id}")
-    public ResponseDto<?> updateComment(@RequestBody CommentsRequestDto commentRequestDto, @PathVariable(name = "feeds_id") Long feedId, @PathVariable(name = "comments_id") Long commentId, HttpServletRequest request){
-        return commentsService.updateComment(commentRequestDto, feedId, commentId, request);
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseDto<?> deleteComment (@PathVariable(name = "commentId") Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentsService.deleteComment(commentId, userDetails);
     }
-
-    @DeleteMapping("/{feeds_id}/comments/{comments_id}")
-    public ResponseDto<?> deleteComment (@PathVariable(name = "feeds_id") Long feedId, @PathVariable(name = "comments_id") Long commentId, HttpServletRequest request) {
-        return commentsService.deleteComment(feedId,commentId, request);
-    }
-
-
 }

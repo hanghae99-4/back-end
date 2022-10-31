@@ -34,9 +34,10 @@ public class FeedsService {
     private final Verification verification;
 
     @Transactional(readOnly = true)
-    public Feeds isPresentFeed(Long id) {
-        Optional<Feeds> optionalFeed = feedsRepository.findById(id);
-        return optionalFeed.orElse(null);
+    public Feeds getFeed(Long id) {
+        Feeds feed = feedsRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("게시글이 존재하지 않습니다."));
+        return feed;
     }
 
     public ResponseDto<?> createFeeds(FeedsRequestDto feedsRequestDto, Member member) {

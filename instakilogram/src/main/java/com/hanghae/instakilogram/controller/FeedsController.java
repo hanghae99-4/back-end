@@ -17,7 +17,7 @@ public class FeedsController {
 
     // 게시글 생성
     @PostMapping("/feeds")
-    public ResponseDto<?> createFeeds(@RequestBody FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseDto<?> createFeeds(@ModelAttribute FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return feedsService.createFeeds(feedsRequestDto, userDetails.getMember());
     }
