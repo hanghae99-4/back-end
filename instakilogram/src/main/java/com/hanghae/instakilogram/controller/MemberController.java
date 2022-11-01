@@ -3,6 +3,7 @@ package com.hanghae.instakilogram.controller;
 import com.hanghae.instakilogram.dto.request.*;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.security.UserDetailsImpl;
+import com.hanghae.instakilogram.service.FeedsService;
 import com.hanghae.instakilogram.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,18 @@ import java.io.IOException;
 public class MemberController {
 
     private final MemberService memberService;
+    private final FeedsService feedsService;
 
     @PostMapping("/signup")
     @Operation(summary = "Sign Up", description = "회원가입")
     public ResponseDto<?> signUp(@RequestBody SignupRequestDto signupRequestDto) {
         return memberService.signUp(signupRequestDto);
+    }
+
+    @GetMapping("/{memberId}")
+    @Operation(summary = "FeedList by Member", description = "내가 쓴 게시글")
+    public ResponseDto<?> getFeeds(@PathVariable String memberId) {
+        return feedsService.getFeedsByMember(memberId);
     }
 
 

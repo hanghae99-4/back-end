@@ -39,7 +39,7 @@ public class FeedsController {
 
     // 게시글 수정
     @PutMapping("/feeds/{feedsId}")
-    public ResponseDto<?> updateFeeds(@PathVariable Long feedsId, @RequestBody FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+    public ResponseDto<?> updateFeeds(@PathVariable Long feedsId, @ModelAttribute FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 
         return feedsService.updateFeeds(feedsId, feedsRequestDto, userDetails.getMember());
     }

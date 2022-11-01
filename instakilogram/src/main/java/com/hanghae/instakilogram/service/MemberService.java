@@ -8,15 +8,14 @@ import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.entity.RefreshToken;
 import com.hanghae.instakilogram.repository.MemberRepository;
 import com.hanghae.instakilogram.repository.RefreshTokenRepository;
-import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import com.hanghae.instakilogram.security.jwt.JwtFilter;
 import com.hanghae.instakilogram.util.S3Uploader;
+import com.hanghae.instakilogram.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,13 +34,11 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
-
+    private final Util util;
     private final S3Uploader s3Uploader;
 
     @Transactional
     public ResponseDto<?> signUp(SignupRequestDto signupRequestDto) {
-        if (memberRepository.existsByMemberId(signupRequestDto.getMemberId()))
-            throw new IllegalStateException("중복된 아이디입니다.");
         Member member = Member.builder()
                 .memberId(signupRequestDto.getMemberId())
                 .username(signupRequestDto.getUsername())
@@ -74,8 +71,7 @@ public class MemberService {
 
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        Member member = memberRepository.findById(loginRequestDto.getMemberId())
-                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저입니다."));
+        Member member = util.getMember(loginRequestDto.getMemberId());
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword()))
             throw new RuntimeException("패스워드가 일치하지 않습니다.");
@@ -88,7 +84,6 @@ public class MemberService {
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-        System.out.println(refreshToken + "1111111");
         response.setHeader(JwtFilter.AUTHORIZATION_HEADER, JwtFilter.BEARER_PREFIX + tokenDto.getAccessToken());
         response.setHeader("Refresh-Token", tokenDto.getRefreshToken());
 
@@ -98,8 +93,7 @@ public class MemberService {
 
     public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, Member member, String memberId) throws IOException {
 
-        Member preMember = memberRepository.findById(member.getMemberId())
-                .orElseThrow(() -> new UsernameNotFoundException(" 회원 정보가 존재하지 않습니다."));
+        Member preMember = util.getMember(member.getMemberId());
 
         if (!preMember.getMemberId().equals(memberId)) {
             return ResponseDto.fail("본인만 수정할 수 있습니다.");
