@@ -7,9 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,7 +18,7 @@ public class HeartController {
 
     private final HeartService heartService;
 
-    @PostMapping("/feeds/{feedId}/heart")
+    @GetMapping("/feeds/{feedId}/heart")
     public ResponseDto<?> updateHeart(@PathVariable Long feedId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 
 

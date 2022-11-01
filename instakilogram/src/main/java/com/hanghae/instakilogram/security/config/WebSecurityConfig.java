@@ -18,6 +18,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -34,18 +36,18 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return  (web) -> web.ignoring()
-                .antMatchers( "/favicon.ico");
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return  (web) -> web.ignoring()
+//                .antMatchers( "/favicon.ico");
+//    }
 
     @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+        http.cors();
         http.csrf().disable()
-                .cors().disable()
+//                .cors().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
@@ -65,10 +67,10 @@ public class WebSecurityConfig {
                 .antMatchers("/login").permitAll()
                 .antMatchers("/v2/api-docs/**").permitAll()   // OAS_30
                 .antMatchers("/swagger-resources/**").permitAll()
-                // .antMatchers("/v2/api-docs/**").permitAll()   // swagger 2
                 .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/**").authenticated()
                 .anyRequest()
-                .authenticated()
+                .permitAll()
 
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));

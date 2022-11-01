@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class TokenProvider {
-    private static final String AUTHORITIES_KEY = "auth";
+    private static final String AUTHORITIES_KEY = "Authorization";
     private static final String BEARER_TYPE = "bearer ";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; //30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
@@ -81,15 +81,6 @@ public class TokenProvider {
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find " + memberId));
         UserDetailsImpl userDetails = new UserDetailsImpl(member);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
-    public Member getMemberFromAuthentication() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || AnonymousAuthenticationToken.class.
-                isAssignableFrom(authentication.getClass())) {
-            return null;
-        }
-        return ((UserDetailsImpl) authentication.getPrincipal()).getMember();
     }
 
     public boolean validateToken(String token) {

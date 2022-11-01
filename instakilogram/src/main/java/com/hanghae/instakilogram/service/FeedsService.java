@@ -10,7 +10,6 @@ import com.hanghae.instakilogram.repository.*;
 import com.hanghae.instakilogram.util.S3Uploader;
 import com.hanghae.instakilogram.util.Util;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +42,7 @@ public class FeedsService {
         Feeds feeds = Feeds.builder()
                 .member(member)
                 .imageUrl(s3Uploader.uploadFiles(feedsRequestDto.getImage(),"feeds", member, "feed"))
-                .contents(feedsRequestDto.getContent())
+                .contents(feedsRequestDto.getContents())
                 .build();
 
         feedsRepository.save(feeds);
@@ -85,7 +84,7 @@ public class FeedsService {
         Feeds newFeed = Feeds.builder()
                 .id(feeds.getId())
                 .imageUrl(s3Uploader.uploadFiles(feedsRequestDto.getImage(),"feeds", member, "feed"))
-                .contents(feedsRequestDto.getContent())
+                .contents(feedsRequestDto.getContents())
                 .build();
 
         feedsRepository.save(newFeed);

@@ -5,9 +5,7 @@ import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,7 +15,7 @@ public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/follow/{toMemberId}")
+    @GetMapping("/follow/{toMemberId}")
     public ResponseDto<?> follow(@PathVariable String toMemberId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return followService.updateFollow(toMemberId, userDetails.getMember());

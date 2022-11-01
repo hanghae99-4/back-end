@@ -10,5 +10,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class FeedsRequestDto {
 
     private MultipartFile image;
-    private String content;
+    private String contents;
 }
