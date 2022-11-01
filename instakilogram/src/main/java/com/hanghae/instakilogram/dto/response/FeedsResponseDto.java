@@ -15,6 +15,8 @@ public class FeedsResponseDto {
 
     private Long feedId;
 
+    private String feedImage;
+
     private String memberId;
 
     private String nickname;
@@ -30,8 +32,9 @@ public class FeedsResponseDto {
     private boolean heartByMe;
 
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
-    private Long heartNum;
+    private int heartNum;
 
     private List<CommentsResponseDto> commentsList;
 

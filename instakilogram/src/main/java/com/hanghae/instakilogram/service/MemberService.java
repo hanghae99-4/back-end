@@ -96,15 +96,15 @@ public class MemberService {
     }
 
 
-    public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, UserDetailsImpl userDetails, String memberId) throws IOException {
+    public ResponseDto<?> memberUpdate(MemberUpdateRequestDto memberUpdateRequestDto, Member member, String memberId) throws IOException {
 
-        Member preMember = memberRepository.findById(userDetails.getMember().getMemberId())
+        Member preMember = memberRepository.findById(member.getMemberId())
                 .orElseThrow(() -> new UsernameNotFoundException(" 회원 정보가 존재하지 않습니다."));
 
         if (!preMember.getMemberId().equals(memberId)) {
             return ResponseDto.fail("본인만 수정할 수 있습니다.");
         }
-        Member member = Member.builder()
+        Member newMember = Member.builder()
                 .memberId(preMember.getMemberId())
                 .username(preMember.getUsername())
                 .nickname(memberUpdateRequestDto.getNickname())
@@ -113,10 +113,10 @@ public class MemberService {
                 .authority(preMember.getAuthority())
                 .memberImage(
                         (memberUpdateRequestDto.getMemberImage().getOriginalFilename().equals(""))?
-                                null:s3Uploader.uploadFiles(memberUpdateRequestDto.getMemberImage(), "member", userDetails))
+                                null:s3Uploader.uploadFiles(memberUpdateRequestDto.getMemberImage(), "member", member, "member"))
                 .build();
 
-        memberRepository.save(member);
+        memberRepository.save(newMember);
         return ResponseDto.success("회원정보를 업데이트 하셨습니다.");
     }
 

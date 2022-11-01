@@ -21,16 +21,11 @@ public class Follow extends TimeStamped {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "from_member_id")
+    @JoinColumn()
     private Member fromMember;
 
     @ManyToOne
-    @JoinColumn(name = "to_member_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Member toMember;
 
-    @Builder
-    public Follow(FollowRequestDto followRequestDto) {
-        this.fromMember = followRequestDto.getFromMember();
-        this.toMember = followRequestDto.getToMember();
-    }
 }

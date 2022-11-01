@@ -8,9 +8,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class HeartResponseDto {
-
-    private Long FeedsId;
-
+    private String memberImage;
     private String ninkname;
-
 }

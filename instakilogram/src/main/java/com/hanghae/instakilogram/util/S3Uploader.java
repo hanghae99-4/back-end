@@ -3,7 +3,7 @@ package com.hanghae.instakilogram.util;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.hanghae.instakilogram.security.UserDetailsImpl;
+import com.hanghae.instakilogram.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +26,15 @@ public class S3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String uploadFiles(MultipartFile multipartFile, String dirName, UserDetailsImpl userDetails) throws IOException {
+    public String uploadFiles(MultipartFile multipartFile, String dirName, Member member, String type) throws IOException {
         File uploadFile = convert(multipartFile)
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
-        return upload(uploadFile,dirName, userDetails);
+        return upload(uploadFile,dirName, member, type);
     }
 
-    private String upload(File uploadFile, String filePath, UserDetailsImpl userDetails) {
-//        String fileName = filePath + "/" + UUID.randomUUID() + uploadFile.getName();
-        String fileName = filePath + "/" + userDetails.getMember().getMemberId();
+    private String upload(File uploadFile, String filePath, Member member, String type) {
+        String name = (type.equals("member"))? member.getMemberId() : UUID.randomUUID() + member.getMemberId();
+        String fileName = filePath + "/" + name;
         String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
         return uploadImageUrl;

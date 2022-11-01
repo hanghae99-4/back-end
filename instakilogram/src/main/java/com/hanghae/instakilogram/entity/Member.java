@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Primary;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,4 +41,5 @@ public class Member extends TimeStamped {
     @JsonIgnore
     @Enumerated(EnumType.STRING)
     private Authority authority;
+
 }

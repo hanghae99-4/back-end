@@ -6,22 +6,19 @@ import com.hanghae.instakilogram.entity.Feeds;
 import com.hanghae.instakilogram.entity.Heart;
 import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.repository.HeartRepository;
-import com.hanghae.instakilogram.util.Verification;
+import com.hanghae.instakilogram.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class HeartService {
 
     private final HeartRepository heartRepository;
-    private final Verification verification;
+    private final Util util;
     public ResponseDto<?> updateHeart(Long feedId, Member member) {
 
-        Feeds feeds = verification.getCurrentFeeds(feedId);
+        Feeds feeds = util.getCurrentFeeds(feedId);
 
         Heart findHeart = heartRepository.findByMemberAndFeeds(member,feeds).orElse(null);
 

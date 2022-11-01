@@ -24,12 +24,12 @@ public class Comments extends TimeStamped {
     private String contents;
 
     @ManyToOne
-    @JoinColumn(name = "feeds_id")
+    @JoinColumn(name = "feeds_id", nullable = false)
     private Feeds feeds;
 
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
 }

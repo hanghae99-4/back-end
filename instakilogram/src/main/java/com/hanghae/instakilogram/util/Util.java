@@ -3,31 +3,27 @@ package com.hanghae.instakilogram.util;
 import com.hanghae.instakilogram.entity.Feeds;
 import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.repository.FeedsRepository;
-import com.hanghae.instakilogram.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class Verification {
+public class Util {
 
     private final FeedsRepository feedsRepository;
 
     public Feeds getCurrentFeeds(Long feedsId) {
 
-        Optional<Feeds> feeds = feedsRepository.findById(feedsId);
-
-        return feeds.orElse(null);
+        Feeds feeds = feedsRepository.findById(feedsId).orElseThrow(() -> new IllegalStateException("존재하지 않는 게시글입니다."));
+        return feeds;
     }
 
     public void checkFeedsMember(Feeds feeds, Member member) {
 
         if(!feeds.getMember().getMemberId().equals(member.getMemberId())){
-            throw new RuntimeException("작성자만 수정 가능합니다.");
+            throw new IllegalStateException("작성자만 수정 가능합니다.");
         }
     }
 }

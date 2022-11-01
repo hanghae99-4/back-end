@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -17,7 +19,7 @@ public class FeedsController {
 
     // 게시글 생성
     @PostMapping("/feeds")
-    public ResponseDto<?> createFeeds(@ModelAttribute FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseDto<?> createFeeds(@ModelAttribute FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 
         return feedsService.createFeeds(feedsRequestDto, userDetails.getMember());
     }
@@ -37,7 +39,7 @@ public class FeedsController {
 
     // 게시글 수정
     @PutMapping("/feeds/{feedsId}")
-    public ResponseDto<?> updateFeeds(@PathVariable Long feedsId, @RequestBody FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseDto<?> updateFeeds(@PathVariable Long feedsId, @RequestBody FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 
         return feedsService.updateFeeds(feedsId, feedsRequestDto, userDetails.getMember());
     }

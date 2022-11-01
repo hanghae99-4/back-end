@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class CommentsResponseDto {
     private Long id;
     private String memberId;
+    private String memberImage;
     private String contents;
     private Long feedId;
 }

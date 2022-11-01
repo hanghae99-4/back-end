@@ -5,7 +5,6 @@ import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +40,7 @@ public class MemberController {
     @PutMapping("/{memberId}")
     @Operation(summary = "Member Info Update", description = "멤버 정보 업데이트")
     public ResponseDto<?> memberUpdate(@ModelAttribute MemberUpdateRequestDto memberUpdateRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable String memberId) throws IOException {
-        return memberService.memberUpdate(memberUpdateRequestDto, userDetails, memberId);
+        return memberService.memberUpdate(memberUpdateRequestDto, userDetails.getMember(), memberId);
     }
 
     @PostMapping("/login")

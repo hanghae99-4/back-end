@@ -24,20 +24,9 @@ public class Feeds extends TimeStamped {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column
+    @Column(nullable = false)
     private String imageUrl;
 
     @Column
-    private Long heartNum;
-
-    @Column
     private String contents;
-
-
-
-    public void update(FeedsRequestDto feedsRequestDto) {
-
-        this.contents = feedsRequestDto.getContent();
-
-    }
 }
