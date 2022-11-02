@@ -83,7 +83,7 @@ public class FeedsService {
 
         Feeds newFeed = Feeds.builder()
                 .id(feeds.getId())
-                .imageUrl(s3Uploader.uploadFiles(feedsRequestDto.getImage(),"feeds", member, "feed"))
+                .imageUrl(feeds.getImageUrl())
                 .contents(feedsRequestDto.getContents())
                 .build();
 
