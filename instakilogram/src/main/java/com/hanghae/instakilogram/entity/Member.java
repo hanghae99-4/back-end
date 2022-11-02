@@ -42,4 +42,11 @@ public class Member extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
+    @OneToMany(mappedBy = "toMember", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Follow> followList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fromMember", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Follow> followerList = new ArrayList<>();
 }

@@ -35,7 +35,7 @@ public class CommentsService {
                     .contents(commentsRequestDto.getContents())
                     .build();
             commentsRepository.save(comment);
-            return ResponseDto.success("댓글을 등록하셨습니다.");
+            return ResponseDto.success(comment);
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +66,7 @@ public class CommentsService {
         }
 
         commentsRepository.delete(comment);
-        return ResponseDto.success("댓글을 삭제하셨습니다.");
+        return ResponseDto.success(comment);
     }
 
     @Transactional(readOnly = true)

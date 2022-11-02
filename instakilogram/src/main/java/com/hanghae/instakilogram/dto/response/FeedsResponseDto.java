@@ -1,41 +1,23 @@
 package com.hanghae.instakilogram.dto.response;
 
-import com.hanghae.instakilogram.entity.Comments;
+import com.hanghae.instakilogram.entity.Feeds;
+import com.hanghae.instakilogram.entity.Follow;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 public class FeedsResponseDto {
-
-    private Long feedId;
-
-    private String feedImage;
-
     private String memberId;
-
-    private String nickname;
-
-    private String memberImage;
-
-    private String introduce;
-
     private String username;
-
-    private String contents;
-
-    private boolean heartByMe;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-
-    private int heartNum;
-
-    private List<CommentsResponseDto> commentsList;
-
+    private String memberImage;
+    private String introduce;
+    private String nickname;
+    private List<FeedsListResponseDto> feedsList;
+    private List<Follow> followList;
+    private List<Follow> followerList;
 }

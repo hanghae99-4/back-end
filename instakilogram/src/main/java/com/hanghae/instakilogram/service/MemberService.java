@@ -4,8 +4,10 @@ import com.hanghae.instakilogram.dto.TokenDto;
 import com.hanghae.instakilogram.dto.request.*;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.entity.Authority;
+import com.hanghae.instakilogram.entity.Follow;
 import com.hanghae.instakilogram.entity.Member;
 import com.hanghae.instakilogram.entity.RefreshToken;
+import com.hanghae.instakilogram.repository.FollowRepository;
 import com.hanghae.instakilogram.repository.MemberRepository;
 import com.hanghae.instakilogram.repository.RefreshTokenRepository;
 import com.hanghae.instakilogram.security.jwt.TokenProvider;
@@ -28,7 +30,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class MemberService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-
+    private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
     private final EntityManager entityManager;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -48,6 +50,11 @@ public class MemberService {
                 .build();
 
         entityManager.persist(member);
+        Follow follow = Follow.builder()
+                .toMember(member)
+                .fromMember(member)
+                .build();
+        followRepository.save(follow);
 
         memberRepository.save(member);
         return ResponseDto.success("회원가입 되었습니다.");

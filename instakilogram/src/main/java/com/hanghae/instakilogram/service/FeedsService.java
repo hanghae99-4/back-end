@@ -2,10 +2,7 @@ package com.hanghae.instakilogram.service;
 
 import com.hanghae.instakilogram.dto.request.FeedsRequestDto;
 import com.hanghae.instakilogram.dto.request.FeedsUpdateDto;
-import com.hanghae.instakilogram.dto.response.CommentsResponseDto;
-import com.hanghae.instakilogram.dto.response.FeedsResponseDto;
-import com.hanghae.instakilogram.dto.response.HeartResponseDto;
-import com.hanghae.instakilogram.dto.response.ResponseDto;
+import com.hanghae.instakilogram.dto.response.*;
 import com.hanghae.instakilogram.entity.*;
 import com.hanghae.instakilogram.repository.*;
 import com.hanghae.instakilogram.util.S3Uploader;
@@ -27,7 +24,6 @@ public class FeedsService {
     private final FollowRepository followRepository;
 
     private final HeartRepository heartRepository;
-    private final CommentsRepository commentsRepository;
     private final Util util;
     private final S3Uploader s3Uploader;
 
@@ -42,37 +38,36 @@ public class FeedsService {
 
         Feeds feeds = Feeds.builder()
                 .member(member)
-                .imageUrl(s3Uploader.uploadFiles(feedsRequestDto.getImage(),"feeds", member, "feed"))
+                .feedImage(s3Uploader.uploadFiles(feedsRequestDto.getImage(),"feeds", member, "feed"))
                 .contents(feedsRequestDto.getContents())
                 .build();
 
         feedsRepository.save(feeds);
 
-        return ResponseDto.success("게시물 생성 성공");
+        return ResponseDto.success(feeds);
     }
 
     public ResponseDto<?> getFeedsByMember(String memberId) {
         Member member = util.getMember(memberId);
         List<Feeds> feedsList = feedsRepository.findAllByMember(member);
-        List<FeedsResponseDto> feedsResponseDtoList = new ArrayList<>();
-        return ResponseDto.success(getFeeds(member, feedsList, feedsResponseDtoList));
+        List<FeedsListResponseDto> feedsListResponseDtoList = new ArrayList<>();
+        getFeeds(member, feedsList, feedsListResponseDtoList);
+        return ResponseDto.success(getFeedDto(member, feedsListResponseDtoList));
     }
 
 
-
     public ResponseDto<?> getAllFeeds(Member member) {
-
         List<Follow> followList = followRepository.findAllByFromMember(member);
-        List<FeedsResponseDto> feedsResponseDtoList = new ArrayList<>();
+        List<FeedsListResponseDto> feedsListResponseDtoList = new ArrayList<>();
 
         for (Follow following:followList){
             Member byMe = util.getMember(following.getToMember().getMemberId());
             List<Feeds> feedsList = feedsRepository.findAllByMember(byMe);
 
-            getFeeds(member, feedsList, feedsResponseDtoList);
+            getFeeds(member, feedsList, feedsListResponseDtoList);
         }
 
-        return ResponseDto.success(feedsResponseDtoList);
+        return ResponseDto.success(feedsListResponseDtoList);
     }
 
     public ResponseDto<?> updateFeeds(Long feedsId, FeedsUpdateDto feedsUpdateDto, Member member) {
@@ -85,13 +80,13 @@ public class FeedsService {
         Feeds newFeed = Feeds.builder()
                 .id(feeds.getId())
                 .member(member)
-                .imageUrl(feeds.getImageUrl())
+                .feedImage(feeds.getFeedImage())
                 .contents(feedsUpdateDto.getContents())
                 .build();
 
         feedsRepository.save(newFeed);
 
-        return ResponseDto.success("게시물 수정에 성공했습니다.");
+        return ResponseDto.success(newFeed);
     }
 
     public ResponseDto<?> deleteFeeds(Long feedsId, Member member) {
@@ -108,88 +103,56 @@ public class FeedsService {
 
         Feeds feeds = util.getCurrentFeeds(feedsId);
 
-        List<Comments> commentsList = commentsRepository.findAllByFeeds(feeds);
-        List<CommentsResponseDto> commentsResponseDtoList = new ArrayList<>();
-
-        for (Comments comments : commentsList) {
-            commentsResponseDtoList.add(CommentsResponseDto.builder()
-                    .id(comments.getId())
-                    .contents(comments.getContents())
-                    .memberImage(comments.getMember().getMemberImage())
-                    .memberId(comments.getMember().getMemberId())
-                    .feedId(comments.getFeeds().getId())
-                    .build());
-        }
-
-        List<Heart> heartList = heartRepository.findByFeeds(feeds);
-        List<HeartResponseDto> heartResponseDtoList = new ArrayList<>();
-
-        for (Heart heart : heartList) {
-            heartResponseDtoList.add(HeartResponseDto.builder()
-                    .ninkname(heart.getMember().getNickname())
-                    .memberImage(heart.getMember().getMemberImage())
-                    .build());
-        }
-
         Optional<Heart> heartOptional = heartRepository.findByMemberAndFeeds(member, feeds);
         boolean heartByMe = heartOptional.isPresent();
 
-        return ResponseDto.success(FeedsResponseDto.builder()
+        return ResponseDto.success(FeedsListResponseDto.builder()
+                .feedId(feeds.getId())
                 .memberId(feeds.getMember().getMemberId())
                 .memberImage(feeds.getMember().getMemberImage())
-                .nickname(feeds.getMember().getNickname())
-                .feedId(feeds.getId())
-                .feedImage(feeds.getImageUrl())
+                .feedImage(feeds.getFeedImage())
                 .contents(feeds.getContents())
-                .commentsList(commentsResponseDtoList)
-                .heartByMe(heartByMe)
-                .heartNum(heartList.size())
+                .commentsList(feeds.getCommentsList())
                 .createdAt(feeds.getCreatedAt())
                 .modifiedAt(feeds.getModifiedAt())
+                .heartByMe(heartByMe)
+                .heartNum((long) feeds.getHeartList().size())
+                .nickname(feeds.getMember().getNickname())
                 .build());
     }
 
-    private List<FeedsResponseDto> getFeeds(Member member, List<Feeds> feedsList, List<FeedsResponseDto> feedsResponseDtoList) {
+    private List<FeedsListResponseDto> getFeeds(Member member, List<Feeds> feedsList, List<FeedsListResponseDto> feedsListResponseDtoList) {
         for (int i = feedsList.size()-1; i >= 0; i--){
-
-            List<Comments> commentsList = commentsRepository.findAllByFeeds(feedsList.get(i));
-            List<CommentsResponseDto> commentsResponseDtoList = new ArrayList<>();
-
-            for (Comments comments : commentsList) {
-                commentsResponseDtoList.add(CommentsResponseDto.builder()
-                        .id(comments.getId())
-                        .feedId(comments.getFeeds().getId())
-                        .memberId(comments.getMember().getMemberId())
-                        .memberImage(comments.getMember().getMemberImage())
-                        .contents(comments.getContents())
-                        .build());
-            }
-
-            List<Heart> heartList = heartRepository.findByFeeds(feedsList.get(i));
-            List<HeartResponseDto> heartResponseDtoList = new ArrayList<>();
-
-            for (Heart hearts : heartList) {
-                heartResponseDtoList.add(HeartResponseDto.builder()
-                        .memberImage(hearts.getMember().getMemberImage())
-                        .ninkname(hearts.getMember().getNickname())
-                        .build());
-            }
-
             Optional<Heart> heart = heartRepository.findByMemberAndFeeds(member, feedsList.get(i));
             boolean heartByMe = heart.isPresent();
-            feedsResponseDtoList.add(FeedsResponseDto.builder()
+            feedsListResponseDtoList.add(FeedsListResponseDto.builder()
                     .feedId(feedsList.get(i).getId())
                     .memberId(feedsList.get(i).getMember().getMemberId())
                     .memberImage(feedsList.get(i).getMember().getMemberImage())
-                    .feedImage(feedsList.get(i).getImageUrl())
-                    .createdAt(feedsList.get(i).getCreatedAt())
-                    .heartByMe(heartByMe)
-                    .heartNum(heartList.size())
-                    .nickname(feedsList.get(i).getMember().getNickname())
-                    .commentsList(commentsResponseDtoList)
+                    .feedImage(feedsList.get(i).getFeedImage())
                     .contents(feedsList.get(i).getContents())
+                    .commentsList(feedsList.get(i).getCommentsList())
+                    .createdAt(feedsList.get(i).getCreatedAt())
+                    .modifiedAt(feedsList.get(i).getModifiedAt())
+                    .heartByMe(heartByMe)
+                    .heartNum((long) feedsList.get(i).getHeartList().size())
+                    .nickname(feedsList.get(i).getMember().getNickname())
                     .build());
         }
-        return feedsResponseDtoList;
+        return feedsListResponseDtoList;
+    }
+
+    public FeedsResponseDto getFeedDto(Member member, List<FeedsListResponseDto> feedsListResponseDtoList) {
+        FeedsResponseDto feedsResponseDto = FeedsResponseDto.builder()
+                .memberId(member.getMemberId())
+                .username(member.getUsername())
+                .memberImage(member.getMemberImage())
+                .introduce(member.getIntroduce())
+                .nickname(member.getNickname())
+                .feedsList(feedsListResponseDtoList)
+                .followList(member.getFollowList())
+                .followerList(member.getFollowerList())
+                .build();
+        return feedsResponseDto;
     }
 }
