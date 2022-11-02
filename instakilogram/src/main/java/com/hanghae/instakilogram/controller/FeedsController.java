@@ -1,6 +1,7 @@
 package com.hanghae.instakilogram.controller;
 
 import com.hanghae.instakilogram.dto.request.FeedsRequestDto;
+import com.hanghae.instakilogram.dto.request.FeedsUpdateDto;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.security.UserDetailsImpl;
 import com.hanghae.instakilogram.service.FeedsService;
@@ -32,16 +33,15 @@ public class FeedsController {
 
     // 게시글 상세 조회
     @GetMapping("/feeds/{feedsId}")
-    public ResponseDto<?> getDetailFeeds(@PathVariable Long feedsId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseDto<?> getDetailFeeds(@PathVariable("feedsId") Long feedsId, @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return feedsService.getDetailFeeds(feedsId, userDetails.getMember());
     }
 
     // 게시글 수정
     @PutMapping("/feeds/{feedsId}")
-    public ResponseDto<?> updateFeeds(@PathVariable Long feedsId, @ModelAttribute FeedsRequestDto feedsRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-
-        return feedsService.updateFeeds(feedsId, feedsRequestDto, userDetails.getMember());
+    public ResponseDto<?> updateFeeds(@PathVariable("feedsId") Long feedsId, @ModelAttribute FeedsUpdateDto feedsUpdateDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        return feedsService.updateFeeds(feedsId, feedsUpdateDto, userDetails.getMember());
     }
 
     // 게시글 삭제

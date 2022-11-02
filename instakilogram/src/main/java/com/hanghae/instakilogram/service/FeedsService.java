@@ -1,6 +1,7 @@
 package com.hanghae.instakilogram.service;
 
 import com.hanghae.instakilogram.dto.request.FeedsRequestDto;
+import com.hanghae.instakilogram.dto.request.FeedsUpdateDto;
 import com.hanghae.instakilogram.dto.response.CommentsResponseDto;
 import com.hanghae.instakilogram.dto.response.FeedsResponseDto;
 import com.hanghae.instakilogram.dto.response.HeartResponseDto;
@@ -74,7 +75,7 @@ public class FeedsService {
         return ResponseDto.success(feedsResponseDtoList);
     }
 
-    public ResponseDto<?> updateFeeds(Long feedsId, FeedsRequestDto feedsRequestDto, Member member) throws IOException {
+    public ResponseDto<?> updateFeeds(Long feedsId, FeedsUpdateDto feedsUpdateDto, Member member) {
 
         Feeds feeds = util.getCurrentFeeds(feedsId);
         if (util.checkFeedsMember(feeds, member)) {
@@ -83,8 +84,9 @@ public class FeedsService {
 
         Feeds newFeed = Feeds.builder()
                 .id(feeds.getId())
+                .member(member)
                 .imageUrl(feeds.getImageUrl())
-                .contents(feedsRequestDto.getContents())
+                .contents(feedsUpdateDto.getContents())
                 .build();
 
         feedsRepository.save(newFeed);
@@ -159,7 +161,7 @@ public class FeedsService {
                         .feedId(comments.getFeeds().getId())
                         .memberId(comments.getMember().getMemberId())
                         .memberImage(comments.getMember().getMemberImage())
-                        .contents(feedsList.get(i).getContents())
+                        .contents(comments.getContents())
                         .build());
             }
 
