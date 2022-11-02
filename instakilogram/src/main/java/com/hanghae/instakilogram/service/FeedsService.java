@@ -27,12 +27,6 @@ public class FeedsService {
     private final Util util;
     private final S3Uploader s3Uploader;
 
-    @Transactional(readOnly = true)
-    public Feeds getFeed(Long id) {
-        Feeds feed = feedsRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("게시글이 존재하지 않습니다."));
-        return feed;
-    }
 
     @Transactional
     public ResponseDto<?> createFeeds(FeedsRequestDto feedsRequestDto, Member member) throws IOException {
@@ -60,16 +54,16 @@ public class FeedsService {
     @Transactional
     public ResponseDto<?> getAllFeeds(Member member) {
         List<Follow> followList = followRepository.findAllByFromMember(member);
-        List<FeedResponseDto> feedResponseDtos = new ArrayList<>();
+        List<FeedResponseDto> feed = new ArrayList<>();
 
         for (Follow following:followList){
             Member byMe = util.getMember(following.getToMember().getMemberId());
             List<Feeds> feedsList = feedsRepository.findAllByMember(byMe);
 
-            getFeeds(member, feedsList, feedResponseDtos);
+            getFeeds(member, feedsList, feed);
         }
 
-        return ResponseDto.success(feedResponseDtos);
+        return ResponseDto.success(feed);
     }
 
     @Transactional
@@ -111,6 +105,12 @@ public class FeedsService {
         return ResponseDto.success(getResponseDto(member, feeds));
     }
 
+    @Transactional(readOnly = true)
+    public Feeds getFeed(Long id) {
+        Feeds feed = feedsRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("게시글이 존재하지 않습니다."));
+        return feed;
+    }
     public FeedResponseDto getResponseDto(Member member, Feeds feeds) {
         Optional<Heart> heartOptional = heartRepository.findByMemberAndFeeds(member, feeds);
         boolean heartByMe = heartOptional.isPresent();
@@ -124,7 +124,7 @@ public class FeedsService {
                 .createdAt(feeds.getCreatedAt())
                 .modifiedAt(feeds.getModifiedAt())
                 .heartByMe(heartByMe)
-                .heartList(feeds.getHeartList())
+                .heartNum(feeds.getHeartList().size())
                 .nickname(feeds.getMember().getNickname())
                 .build();
         return feedResponseDto;
@@ -144,7 +144,7 @@ public class FeedsService {
                     .createdAt(feedsList.get(i).getCreatedAt())
                     .modifiedAt(feedsList.get(i).getModifiedAt())
                     .heartByMe(heartByMe)
-                    .heartList(feedsList.get(i).getHeartList())
+                    .heartNum(feedsList.get(i).getHeartList().size())
                     .nickname(feedsList.get(i).getMember().getNickname())
                     .build());
         }
