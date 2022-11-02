@@ -35,7 +35,13 @@ public class CommentsService {
                     .contents(commentsRequestDto.getContents())
                     .build();
             commentsRepository.save(comment);
-            return ResponseDto.success(comment);
+            CommentsResponseDto commentsResponseDto = CommentsResponseDto.builder()
+                    .id(comment.getId())
+                    .contents(comment.getContents())
+                    .feedId(comment.getFeeds().getId())
+                    .memberId(comment.getMember().getMemberId())
+                    .build();
+            return ResponseDto.success(commentsResponseDto);
     }
 
     @Transactional(readOnly = true)

@@ -34,6 +34,7 @@ public class FeedsService {
         return feed;
     }
 
+    @Transactional
     public ResponseDto<?> createFeeds(FeedsRequestDto feedsRequestDto, Member member) throws IOException {
 
         Feeds feeds = Feeds.builder()
@@ -44,32 +45,34 @@ public class FeedsService {
 
         feedsRepository.save(feeds);
 
-        return ResponseDto.success(feeds);
+        return ResponseDto.success(getResponseDto(member, feeds));
     }
 
+    @Transactional
     public ResponseDto<?> getFeedsByMember(String memberId) {
         Member member = util.getMember(memberId);
         List<Feeds> feedsList = feedsRepository.findAllByMember(member);
-        List<FeedsListResponseDto> feedsListResponseDtoList = new ArrayList<>();
-        getFeeds(member, feedsList, feedsListResponseDtoList);
-        return ResponseDto.success(getFeedDto(member, feedsListResponseDtoList));
+        List<FeedResponseDto> feedResponseDtos = new ArrayList<>();
+        getFeeds(member, feedsList, feedResponseDtos);
+        return ResponseDto.success(getFeedDto(member, feedResponseDtos));
     }
 
-
+    @Transactional
     public ResponseDto<?> getAllFeeds(Member member) {
         List<Follow> followList = followRepository.findAllByFromMember(member);
-        List<FeedsListResponseDto> feedsListResponseDtoList = new ArrayList<>();
+        List<FeedResponseDto> feedResponseDtos = new ArrayList<>();
 
         for (Follow following:followList){
             Member byMe = util.getMember(following.getToMember().getMemberId());
             List<Feeds> feedsList = feedsRepository.findAllByMember(byMe);
 
-            getFeeds(member, feedsList, feedsListResponseDtoList);
+            getFeeds(member, feedsList, feedResponseDtos);
         }
 
-        return ResponseDto.success(feedsListResponseDtoList);
+        return ResponseDto.success(feedResponseDtos);
     }
 
+    @Transactional
     public ResponseDto<?> updateFeeds(Long feedsId, FeedsUpdateDto feedsUpdateDto, Member member) {
 
         Feeds feeds = util.getCurrentFeeds(feedsId);
@@ -86,9 +89,10 @@ public class FeedsService {
 
         feedsRepository.save(newFeed);
 
-        return ResponseDto.success(newFeed);
+        return ResponseDto.success(getResponseDto(member, newFeed));
     }
 
+    @Transactional
     public ResponseDto<?> deleteFeeds(Long feedsId, Member member) {
 
         Feeds feeds = util.getCurrentFeeds(feedsId);
@@ -99,14 +103,18 @@ public class FeedsService {
         return ResponseDto.success("삭제가 완료되었습니다.");
     }
 
+    @Transactional
     public ResponseDto<?> getDetailFeeds(Long feedsId, Member member) {
 
         Feeds feeds = util.getCurrentFeeds(feedsId);
 
+        return ResponseDto.success(getResponseDto(member, feeds));
+    }
+
+    public FeedResponseDto getResponseDto(Member member, Feeds feeds) {
         Optional<Heart> heartOptional = heartRepository.findByMemberAndFeeds(member, feeds);
         boolean heartByMe = heartOptional.isPresent();
-
-        return ResponseDto.success(FeedsListResponseDto.builder()
+        FeedResponseDto feedResponseDto = FeedResponseDto.builder()
                 .feedId(feeds.getId())
                 .memberId(feeds.getMember().getMemberId())
                 .memberImage(feeds.getMember().getMemberImage())
@@ -116,16 +124,17 @@ public class FeedsService {
                 .createdAt(feeds.getCreatedAt())
                 .modifiedAt(feeds.getModifiedAt())
                 .heartByMe(heartByMe)
-                .heartNum((long) feeds.getHeartList().size())
+                .heartList(feeds.getHeartList())
                 .nickname(feeds.getMember().getNickname())
-                .build());
+                .build();
+        return feedResponseDto;
     }
 
-    private List<FeedsListResponseDto> getFeeds(Member member, List<Feeds> feedsList, List<FeedsListResponseDto> feedsListResponseDtoList) {
+    private List<FeedResponseDto> getFeeds(Member member, List<Feeds> feedsList, List<FeedResponseDto> feed) {
         for (int i = feedsList.size()-1; i >= 0; i--){
             Optional<Heart> heart = heartRepository.findByMemberAndFeeds(member, feedsList.get(i));
             boolean heartByMe = heart.isPresent();
-            feedsListResponseDtoList.add(FeedsListResponseDto.builder()
+            feed.add(FeedResponseDto.builder()
                     .feedId(feedsList.get(i).getId())
                     .memberId(feedsList.get(i).getMember().getMemberId())
                     .memberImage(feedsList.get(i).getMember().getMemberImage())
@@ -135,24 +144,24 @@ public class FeedsService {
                     .createdAt(feedsList.get(i).getCreatedAt())
                     .modifiedAt(feedsList.get(i).getModifiedAt())
                     .heartByMe(heartByMe)
-                    .heartNum((long) feedsList.get(i).getHeartList().size())
+                    .heartList(feedsList.get(i).getHeartList())
                     .nickname(feedsList.get(i).getMember().getNickname())
                     .build());
         }
-        return feedsListResponseDtoList;
+        return feed;
     }
 
-    public FeedsResponseDto getFeedDto(Member member, List<FeedsListResponseDto> feedsListResponseDtoList) {
-        FeedsResponseDto feedsResponseDto = FeedsResponseDto.builder()
+    public FeedsListResponseDto getFeedDto(Member member, List<FeedResponseDto> feed) {
+        FeedsListResponseDto feedsListResponseDto = FeedsListResponseDto.builder()
                 .memberId(member.getMemberId())
                 .username(member.getUsername())
                 .memberImage(member.getMemberImage())
                 .introduce(member.getIntroduce())
                 .nickname(member.getNickname())
-                .feedsList(feedsListResponseDtoList)
+                .feedsList(feed)
                 .followList(member.getFollowList())
                 .followerList(member.getFollowerList())
                 .build();
-        return feedsResponseDto;
+        return feedsListResponseDto;
     }
 }
