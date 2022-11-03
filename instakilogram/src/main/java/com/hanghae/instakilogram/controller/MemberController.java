@@ -59,7 +59,7 @@ public class MemberController {
 
     @PostMapping("/search")
     @Operation(summary = "Search", description = "검색")
-    public ResponseDto<?> search(@RequestBody String keyword) {
-        return ResponseDto.success(memberService.search(keyword));
+    public ResponseDto<?> search(@RequestBody SearchRequestDto searchRequestDto) {
+        return memberService.search(searchRequestDto.getKeyword());
     }
 }

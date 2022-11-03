@@ -2,6 +2,7 @@ package com.hanghae.instakilogram.service;
 
 import com.hanghae.instakilogram.dto.TokenDto;
 import com.hanghae.instakilogram.dto.request.*;
+import com.hanghae.instakilogram.dto.response.MemberResponseDto;
 import com.hanghae.instakilogram.dto.response.ResponseDto;
 import com.hanghae.instakilogram.entity.Authority;
 import com.hanghae.instakilogram.entity.Follow;
@@ -26,6 +27,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -123,9 +125,13 @@ public class MemberService {
     }
 
     @Transactional
-    public List<Member> search(String keyword) {
+    public ResponseDto<?> search(String keyword) {
         List<Member> memberList = memberRepository.findByMemberIdContaining(keyword);
-        return memberList;
+        List<String> memberIdList = memberList.stream().map(Member::getMemberId).collect(Collectors.toList());
+        MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+                .memberIdList(memberIdList)
+                .build();
+        return ResponseDto.success(memberResponseDto);
     }
 
 }
