@@ -57,5 +57,9 @@ public class MemberController {
         return memberService.login(loginRequestDto, httpServletResponse);
     }
 
-
+    @PostMapping("/search")
+    @Operation(summary = "Search", description = "검색")
+    public ResponseDto<?> search(@RequestBody String keyword) {
+        return ResponseDto.success(memberService.search(keyword));
+    }
 }

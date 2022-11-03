@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -119,6 +120,12 @@ public class MemberService {
 
         memberRepository.save(newMember);
         return ResponseDto.success("회원정보를 업데이트 하셨습니다.");
+    }
+
+    @Transactional
+    public List<Member> search(String keyword) {
+        List<Member> memberList = memberRepository.findByMemberIdContaining(keyword);
+        return memberList;
     }
 
 }

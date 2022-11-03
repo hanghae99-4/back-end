@@ -124,7 +124,7 @@ public class FeedsService {
                 .createdAt(feeds.getCreatedAt())
                 .modifiedAt(feeds.getModifiedAt())
                 .heartByMe(heartByMe)
-                .heartNum(feeds.getHeartList().size())
+//                .heartNum(feeds.getHeartList().size())
                 .nickname(feeds.getMember().getNickname())
                 .build();
         return feedResponseDto;

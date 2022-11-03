@@ -8,5 +8,5 @@ import java.util.List;
 public interface MemberRepository extends JpaRepository<Member, String> {
     boolean existsByMemberId(String userId);
 
-//    List<Member> findByMemberIdContaining
+    List<Member> findByMemberIdContaining(String keyword);
 }
